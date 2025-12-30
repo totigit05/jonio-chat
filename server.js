@@ -13,7 +13,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 // USIAMO IL MODELLO STANDARD "gemini-pro"
 // NOTA: Togliamo systemInstruction da qui perché gemini-pro non lo supporta così.
 const model = genAI.getGenerativeModel({ 
-    model: "gemini-pro" 
+    model: "gemini-2.5-flash" 
 });
 
 const systemPrompt = `
