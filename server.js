@@ -1,6 +1,4 @@
-require('dotenv').config();
 const express = require('express');
-const bodyParser = require('body-parser');
 const cors = require('cors');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
@@ -8,7 +6,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -33,27 +31,30 @@ REGOLE:
 2. Rispondi nella lingua dell'utente.
 `;
 
-const model = genAI.getGenerativeModel({ 
-    model: "gemini-1.5-flash", 
-    systemInstruction: systemPrompt
+const model = genAI.getGenerativeModel({
+  model: "gemini-1.5-flash",
+  systemInstruction: systemPrompt
 });
 
 app.post('/chat', async (req, res) => {
-    try {
-        const userMessage = req.body.message;
-        if (!userMessage) return res.status(400).json({ error: "No message" });
-
-        const chat = model.startChat({ history: [] });
-        const result = await chat.sendMessage(userMessage);
-        const response = await result.response;
-
-        res.json({ reply: response.text() });
-    } catch (error) {
-        console.error("Errore Gemini:", error);
-        res.status(500).json({ reply: "Scusa, ho un problema tecnico momentaneo. Contattaci telefonicamente." });
+  try {
+    const { message } = req.body;
+    if (!message) {
+      return res.status(400).json({ error: "No message provided" });
     }
+
+    const chat = model.startChat({ history: [] });
+    const result = await chat.sendMessage(message);
+
+    res.json({ reply: result.response.text() });
+  } catch (error) {
+    console.error("Errore Gemini:", error);
+    res.status(500).json({
+      reply: "Scusa, ho un problema tecnico momentaneo. Contattaci telefonicamente."
+    });
+  }
 });
 
 app.listen(port, () => {
-    console.log(`Server attivo su porta ${port}`);
+  console.log(`Server attivo su porta ${port}`);
 });
